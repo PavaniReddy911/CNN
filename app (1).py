@@ -1,206 +1,323 @@
-# app.py
 
 import streamlit as st
-from PIL import Image
 import numpy as np
-import random
 import cv2
+from PIL import Image
+import matplotlib.pyplot as plt
+import pandas as pd
+import random
 
-# --------------------------------------------------
+# ======================================================
 # PAGE CONFIG
-# --------------------------------------------------
+# ======================================================
 
 st.set_page_config(
     page_title="AI Road Damage Detection",
+    page_icon="🛣️",
     layout="wide"
 )
 
-# --------------------------------------------------
-# LOAD MODEL
-# --------------------------------------------------
+# ======================================================
+# CUSTOM CSS
+# ======================================================
 
-# Load trained ML model
+st.markdown(
+    """
+    <style>
+    .main {
+        background-color: #0f172a;
+        color: white;
+    }
 
+    h1, h2, h3 {
+        color: #38bdf8;
+    }
 
-# --------------------------------------------------
-# CLASS LABELS
-# --------------------------------------------------
+    .stButton>button {
+        background: linear-gradient(90deg,#2563eb,#06b6d4);
+        color: white;
+        border-radius: 12px;
+        height: 3em;
+        width: 100%;
+        font-size: 18px;
+        border: none;
+    }
 
-classes = ["Pothole", "Crack", "Manhole"]
+    .prediction-box {
+        background-color: #1e293b;
+        padding: 20px;
+        border-radius: 15px;
+        border: 2px solid #38bdf8;
+    }
 
-# --------------------------------------------------
-# HEADER SECTION
-# --------------------------------------------------
+    .recommendation-box {
+        background-color: #111827;
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 5px solid #22c55e;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-st.markdown("""
-# 🚧 AI-Based Road Damage Detection System
-### Smart City Infrastructure Monitoring using CNN
-""")
+# ======================================================
+# TITLE
+# ======================================================
 
-st.divider()
+st.title("🛣️ AI-Based Road Damage Detection System")
+st.subheader("Smart City Infrastructure Monitoring using CNN")
 
-# --------------------------------------------------
-# ABOUT PROJECT
-# --------------------------------------------------
+# ======================================================
+# SECTION 2 — ABOUT PROJECT
+# ======================================================
 
-st.subheader("📘 About the Project")
+st.header("📘 About the Project")
 
-st.write("""
-Road monitoring is important for reducing accidents
-and improving transportation safety.
+col1, col2, col3 = st.columns(3)
 
-This AI system detects road damages like potholes,
-cracks, and manholes using image analysis.
+with col1:
+    st.info(
+        """
+        ### Why Road Monitoring is Important
 
-### Industry Applications
-- Smart Cities
-- Road Safety Monitoring
-- Government Infrastructure
-- Autonomous Vehicles
-""")
+        - Prevents accidents
+        - Improves transportation safety
+        - Reduces vehicle damage
+        - Supports smart city infrastructure
+        - Helps governments prioritize repairs
+        """
+    )
 
-st.divider()
+with col2:
+    st.success(
+        """
+        ### Role of CNN in Computer Vision
 
-# --------------------------------------------------
-# IMAGE UPLOAD
-# --------------------------------------------------
+        - Detects cracks and potholes
+        - Learns image patterns automatically
+        - Provides high prediction accuracy
+        - Processes real-time road images
+        - Used widely in autonomous systems
+        """
+    )
 
-st.subheader("📂 Upload Road Image")
+with col3:
+    st.warning(
+        """
+        ### Practical Industry Applications
+
+        - Smart city surveillance
+        - Highway monitoring systems
+        - Autonomous vehicles
+        - Municipal maintenance systems
+        - AI-powered inspection drones
+        """
+    )
+
+# ======================================================
+# BUILT-IN SAMPLE DATASET
+# ======================================================
+
+st.header("🗂️ Built-in Sample Dataset")
+
+sample_images = {
+    "Pothole": "sample_dataset/pothole.jpg",
+    "Crack": "sample_dataset/crack.jpg",
+    "Normal Road": "sample_dataset/normal.jpg",
+    "Road Patch": "sample_dataset/patch.jpg"
+}
+
+selected_sample = st.selectbox(
+    "Choose a sample road image",
+    list(sample_images.keys())
+)
+
+# ======================================================
+# SECTION 3 — UPLOAD AREA
+# ======================================================
+
+st.header("📤 Upload Road Image")
 
 uploaded_file = st.file_uploader(
-    "Upload an image",
+    "Upload a road image",
     type=["jpg", "jpeg", "png"]
 )
 
-# --------------------------------------------------
-# IMAGE PROCESSING
-# --------------------------------------------------
+# ======================================================
+# LOAD IMAGE
+# ======================================================
+
+image = None
 
 if uploaded_file is not None:
-
     image = Image.open(uploaded_file)
+else:
+    try:
+        image = Image.open(sample_images[selected_sample])
+    except:
+        st.warning("Sample image not found.")
 
-    col1, col2 = st.columns(2)
+# ======================================================
+# SECTION 4 — IMAGE PREVIEW
+# ======================================================
 
-    # --------------------------------------------------
-    # IMAGE PREVIEW
-    # --------------------------------------------------
+if image is not None:
+    st.header("🖼️ Uploaded Image Preview")
 
-    with col1:
-        st.subheader("🖼 Uploaded Image")
-        st.image(image, use_container_width=True)
+    st.image(image, caption="Road Image", use_container_width=True)
 
-    # --------------------------------------------------
-    # PREPROCESS IMAGE
-    # --------------------------------------------------
+# ======================================================
+# DUMMY CNN PREDICTION FUNCTION
+# ======================================================
 
-    img = np.array(image)
+classes = [
+    "Pothole",
+    "Crack",
+    "Normal Road",
+    "Road Patch"
+]
 
-    # Resize image
-    img = cv2.resize(img, (128, 128))
+severity_map = {
+    "Pothole": "High",
+    "Crack": "Medium",
+    "Normal Road": "Low",
+    "Road Patch": "Low"
+}
 
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+recommendations = {
+    "Pothole": "Immediate maintenance recommended. High-risk road condition detected.",
+    "Crack": "Schedule repair soon to prevent further damage.",
+    "Normal Road": "Road condition appears safe.",
+    "Road Patch": "Monitor patched region regularly for future deterioration."
+}
 
-    # Flatten image
-    flat_img = gray.flatten()
 
-    # Normalize
-    flat_img = flat_img / 255.0
+def predict_damage():
 
-    # Reshape for model
-    flat_img = flat_img.reshape(1, -1)
+    probabilities = np.random.dirichlet(np.ones(len(classes)), size=1)[0]
 
-    
+    predicted_index = np.argmax(probabilities)
 
-    # --------------------------------------------------
-    # SEVERITY LEVEL
-    # --------------------------------------------------
+    prediction = classes[predicted_index]
 
-    if confidence < 40:
-        severity = "Low"
+    confidence = probabilities[predicted_index] * 100
 
-    elif confidence < 75:
-        severity = "Medium"
+    return prediction, confidence, probabilities
 
-    else:
-        severity = "High"
+# ======================================================
+# SECTION 5 — PREDICTION AREA
+# ======================================================
 
-    # --------------------------------------------------
-    # PREDICTION AREA
-    # --------------------------------------------------
+if image is not None:
 
-    with col2:
+    st.header("🤖 Prediction Area")
 
-        st.subheader("🤖 Prediction Results")
+    if st.button("Analyze Road Damage"):
 
-        st.success(f"Prediction: {predicted_class}")
+        prediction, confidence, probabilities = predict_damage()
 
-        st.info(f"Confidence: {confidence:.2f}%")
+        severity = severity_map[prediction]
 
-        st.warning(f"Severity: {severity}")
+        st.markdown(
+            f"""
+            <div class='prediction-box'>
+            <h2>Prediction: {prediction} Detected</h2>
+            <h3>Confidence: {confidence:.2f}%</h3>
+            <h3>Severity: {severity}</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    st.divider()
+        # ======================================================
+        # SECTION 6 — VISUALIZATION AREA
+        # ======================================================
 
-    # --------------------------------------------------
-    # VISUALIZATION AREA
-    # --------------------------------------------------
+        st.header("📊 Visualization Area")
 
-    st.subheader("📊 Prediction Visualization")
+        chart_data = pd.DataFrame({
+            "Damage Type": classes,
+            "Confidence": probabilities * 100
+        })
 
-    probs = probabilities * 100
+        st.subheader("Class Confidence Graph")
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+        fig, ax = plt.subplots(figsize=(8, 5))
 
-    ax.bar(classes, probs)
+        ax.bar(
+            chart_data["Damage Type"],
+            chart_data["Confidence"]
+        )
 
-    ax.set_xlabel("Damage Type")
+        ax.set_ylabel("Confidence (%)")
+        ax.set_xlabel("Classes")
+        ax.set_title("Road Damage Prediction Confidence")
 
-    ax.set_ylabel("Confidence (%)")
+        st.pyplot(fig)
 
-    ax.set_title("Class Confidence Graph")
+        st.subheader("Probability Distribution")
 
-    st.pyplot(fig)
+        fig2, ax2 = plt.subplots(figsize=(7, 7))
 
-    st.divider()
+        ax2.pie(
+            probabilities,
+            labels=classes,
+            autopct='%1.1f%%'
+        )
 
-    # --------------------------------------------------
-    # RECOMMENDATIONS
-    # --------------------------------------------------
+        st.pyplot(fig2)
 
-    st.subheader("📌 Recommendations")
+        # ======================================================
+        # SECTION 7 — RECOMMENDATIONS
+        # ======================================================
 
-    if predicted_class == "Pothole":
+        st.header("🛠️ Recommendations")
 
-        st.error("""
-        Immediate maintenance recommended.
-        High-risk road condition detected.
-        """)
+        st.markdown(
+            f"""
+            <div class='recommendation-box'>
+            <h3>{recommendations[prediction]}</h3>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    elif predicted_class == "Crack":
+        # ======================================================
+        # EXTRA FEATURES
+        # ======================================================
 
-        st.warning("""
-        Preventive repair suggested.
-        Moderate road damage identified.
-        """)
+        st.header("📌 Additional Insights")
 
-    elif predicted_class == "Manhole":
+        if severity == "High":
+            st.error("⚠️ Severe road damage detected. Immediate authority action required.")
 
-        st.info("""
-        Inspection required for public safety.
-        Possible infrastructure issue detected.
-        """)
+        elif severity == "Medium":
+            st.warning("⚠️ Moderate damage detected. Maintenance recommended.")
 
-predicted_class = random.choice(classes)
+        else:
+            st.success("✅ Road condition is relatively stable.")
 
-confidence = random.uniform(80, 99)
+        st.metric(
+            label="AI Confidence Score",
+            value=f"{confidence:.2f}%"
+        )
 
-probabilities = np.random.dirichlet(np.ones(3), size=1)[0]
+        st.progress(int(confidence))
 
-# --------------------------------------------------
+# ======================================================
 # FOOTER
-# --------------------------------------------------
+# ======================================================
 
-st.divider()
+st.markdown("---")
 
-st.caption("Developed using Machine Learning + Streamlit")
+st.markdown(
+    """
+    ### 🚀 Smart City Vision
+
+    AI-based road monitoring systems help governments automate infrastructure inspection,
+    reduce manual labor, improve public safety, and support future smart transportation systems.
+    """
+)
+
+
