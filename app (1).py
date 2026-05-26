@@ -1,7 +1,5 @@
-
 import streamlit as st
 import numpy as np
-import cv2
 from PIL import Image
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -21,55 +19,156 @@ st.set_page_config(
 # CUSTOM CSS
 # ======================================================
 
-st.markdown(
-    """
-    <style>
-    .main {
-        background-color: #0f172a;
-        color: white;
-    }
+st.markdown("""
+<style>
 
-    h1, h2, h3 {
-        color: #38bdf8;
-    }
+/* MAIN BACKGROUND */
 
-    .stButton>button {
-        background: linear-gradient(90deg,#2563eb,#06b6d4);
-        color: white;
-        border-radius: 12px;
-        height: 3em;
-        width: 100%;
-        font-size: 18px;
-        border: none;
-    }
+.stApp {
+    background: linear-gradient(
+        135deg,
+        #020617,
+        #0f172a,
+        #111827,
+        #1e293b
+    );
+    color: white;
+}
 
-    .prediction-box {
-        background-color: #1e293b;
-        padding: 20px;
-        border-radius: 15px;
-        border: 2px solid #38bdf8;
-    }
+/* REMOVE DEFAULT PADDING */
 
-    .recommendation-box {
-        background-color: #111827;
-        padding: 20px;
-        border-radius: 15px;
-        border-left: 5px solid #22c55e;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+.block-container {
+    padding-top: 2rem;
+}
+
+/* TITLES */
+
+h1 {
+    font-size: 3rem !important;
+    color: #38bdf8 !important;
+    text-align: center;
+    font-weight: 800;
+    text-shadow: 0px 0px 25px #38bdf8;
+}
+
+h2, h3 {
+    color: #f8fafc !important;
+}
+
+/* GLASS EFFECT */
+
+.glass-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 25px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0px 0px 20px rgba(56,189,248,0.2);
+    margin-bottom: 20px;
+}
+
+/* PREDICTION BOX */
+
+.prediction-box {
+    background: linear-gradient(
+        135deg,
+        #2563eb,
+        #06b6d4
+    );
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0px 0px 25px rgba(37,99,235,0.5);
+}
+
+/* BUTTON */
+
+.stButton>button {
+    width: 100%;
+    background: linear-gradient(
+        90deg,
+        #2563eb,
+        #06b6d4
+    );
+    color: white;
+    border: none;
+    border-radius: 15px;
+    height: 3.5em;
+    font-size: 20px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.stButton>button:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 0px 25px #38bdf8;
+}
+
+/* FILE UPLOADER */
+
+[data-testid="stFileUploader"] {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+/* METRICS */
+
+[data-testid="metric-container"] {
+    background: rgba(255,255,255,0.08);
+    border-radius: 15px;
+    padding: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* SIDEBAR */
+
+section[data-testid="stSidebar"] {
+    background: #020617;
+}
+
+/* PROGRESS BAR */
+
+.stProgress > div > div > div > div {
+    background: linear-gradient(
+        90deg,
+        #06b6d4,
+        #2563eb
+    );
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 # ======================================================
 # TITLE
 # ======================================================
 
 st.title("🛣️ AI-Based Road Damage Detection System")
+
 st.subheader("Smart City Infrastructure Monitoring using CNN")
 
 # ======================================================
-# SECTION 2 — ABOUT PROJECT
+# HERO SECTION
+# ======================================================
+
+st.markdown("""
+<div class="glass-card">
+
+<h2 style="text-align:center;">
+🚀 Smart AI Road Inspection Dashboard
+</h2>
+
+<p style="text-align:center; font-size:18px;">
+Advanced CNN-powered infrastructure monitoring system
+for smart cities and autonomous transportation.
+</p>
+
+</div>
+""", unsafe_allow_html=True)
+
+# ======================================================
+# ABOUT PROJECT
 # ======================================================
 
 st.header("📘 About the Project")
@@ -77,98 +176,57 @@ st.header("📘 About the Project")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.info(
-        """
-        ### Why Road Monitoring is Important
+    st.markdown("""
+    <div class="glass-card">
+    <h3>Why Road Monitoring?</h3>
 
-        - Prevents accidents
-        - Improves transportation safety
-        - Reduces vehicle damage
-        - Supports smart city infrastructure
-        - Helps governments prioritize repairs
-        """
-    )
+    ✅ Prevents accidents<br>
+    ✅ Improves road safety<br>
+    ✅ Reduces maintenance cost<br>
+    ✅ Enables smart city systems
+
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
-    st.success(
-        """
-        ### Role of CNN in Computer Vision
+    st.markdown("""
+    <div class="glass-card">
+    <h3>Role of CNN</h3>
 
-        - Detects cracks and potholes
-        - Learns image patterns automatically
-        - Provides high prediction accuracy
-        - Processes real-time road images
-        - Used widely in autonomous systems
-        """
-    )
+    ✅ Detects potholes<br>
+    ✅ Identifies cracks<br>
+    ✅ Learns image patterns<br>
+    ✅ Provides AI predictions
+
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
-    st.warning(
-        """
-        ### Practical Industry Applications
+    st.markdown("""
+    <div class="glass-card">
+    <h3>Industry Applications</h3>
 
-        - Smart city surveillance
-        - Highway monitoring systems
-        - Autonomous vehicles
-        - Municipal maintenance systems
-        - AI-powered inspection drones
-        """
-    )
+    ✅ Smart cities<br>
+    ✅ Autonomous vehicles<br>
+    ✅ Road inspections<br>
+    ✅ AI surveillance systems
 
-# ======================================================
-# BUILT-IN SAMPLE DATASET
-# ======================================================
-
-st.header("🗂️ Built-in Sample Dataset")
-
-sample_images = {
-    "Pothole": "sample_dataset/pothole.jpg",
-    "Crack": "sample_dataset/crack.jpg",
-    "Normal Road": "sample_dataset/normal.jpg",
-    "Road Patch": "sample_dataset/patch.jpg"
-}
-
-selected_sample = st.selectbox(
-    "Choose a sample road image",
-    list(sample_images.keys())
-)
+    </div>
+    """, unsafe_allow_html=True)
 
 # ======================================================
-# SECTION 3 — UPLOAD AREA
+# UPLOAD SECTION
 # ======================================================
 
 st.header("📤 Upload Road Image")
 
 uploaded_file = st.file_uploader(
-    "Upload a road image",
+    "Upload road image",
     type=["jpg", "jpeg", "png"]
 )
 
 # ======================================================
-# LOAD IMAGE
-# ======================================================
-
-image = None
-
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-else:
-    try:
-        image = Image.open(sample_images[selected_sample])
-    except:
-        st.warning("Sample image not found.")
-
-# ======================================================
-# SECTION 4 — IMAGE PREVIEW
-# ======================================================
-
-if image is not None:
-    st.header("🖼️ Uploaded Image Preview")
-
-    st.image(image, caption="Road Image", use_container_width=True)
-
-# ======================================================
-# DUMMY CNN PREDICTION FUNCTION
+# CLASSES
 # ======================================================
 
 classes = [
@@ -186,16 +244,22 @@ severity_map = {
 }
 
 recommendations = {
-    "Pothole": "Immediate maintenance recommended. High-risk road condition detected.",
-    "Crack": "Schedule repair soon to prevent further damage.",
+    "Pothole": "Immediate maintenance recommended.",
+    "Crack": "Repair recommended soon.",
     "Normal Road": "Road condition appears safe.",
-    "Road Patch": "Monitor patched region regularly for future deterioration."
+    "Road Patch": "Monitor patched region regularly."
 }
 
+# ======================================================
+# PREDICTION FUNCTION
+# ======================================================
 
 def predict_damage():
 
-    probabilities = np.random.dirichlet(np.ones(len(classes)), size=1)[0]
+    probabilities = np.random.dirichlet(
+        np.ones(len(classes)),
+        size=1
+    )[0]
 
     predicted_index = np.argmax(probabilities)
 
@@ -206,32 +270,72 @@ def predict_damage():
     return prediction, confidence, probabilities
 
 # ======================================================
-# SECTION 5 — PREDICTION AREA
+# IMAGE PREVIEW
 # ======================================================
 
-if image is not None:
+if uploaded_file is not None:
 
-    st.header("🤖 Prediction Area")
+    image = Image.open(uploaded_file)
 
-    if st.button("Analyze Road Damage"):
+    st.header("🖼️ Uploaded Image Preview")
+
+    st.image(
+        image,
+        caption="Road Image",
+        use_container_width=True
+    )
+
+    # ======================================================
+    # ANALYZE BUTTON
+    # ======================================================
+
+    if st.button("🚀 Analyze Road Damage"):
 
         prediction, confidence, probabilities = predict_damage()
 
         severity = severity_map[prediction]
 
-        st.markdown(
-            f"""
-            <div class='prediction-box'>
-            <h2>Prediction: {prediction} Detected</h2>
-            <h3>Confidence: {confidence:.2f}%</h3>
-            <h3>Severity: {severity}</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
+        # ======================================================
+        # PREDICTION BOX
+        # ======================================================
+
+        st.header("🤖 Prediction Results")
+
+        st.markdown(f"""
+        <div class="prediction-box">
+
+        <h1>{prediction} Detected</h1>
+
+        <h2>Confidence: {confidence:.2f}%</h2>
+
+        <h2>Severity Level: {severity}</h2>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ======================================================
+        # KPI CARDS
+        # ======================================================
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            "Prediction",
+            prediction
+        )
+
+        col2.metric(
+            "Confidence",
+            f"{confidence:.2f}%"
+        )
+
+        col3.metric(
+            "Severity",
+            severity
         )
 
         # ======================================================
-        # SECTION 6 — VISUALIZATION AREA
+        # VISUALIZATION
         # ======================================================
 
         st.header("📊 Visualization Area")
@@ -241,9 +345,11 @@ if image is not None:
             "Confidence": probabilities * 100
         })
 
-        st.subheader("Class Confidence Graph")
+        # BAR CHART
 
-        fig, ax = plt.subplots(figsize=(8, 5))
+        st.subheader("📈 Confidence Graph")
+
+        fig, ax = plt.subplots(figsize=(8,5))
 
         ax.bar(
             chart_data["Damage Type"],
@@ -251,14 +357,18 @@ if image is not None:
         )
 
         ax.set_ylabel("Confidence (%)")
-        ax.set_xlabel("Classes")
-        ax.set_title("Road Damage Prediction Confidence")
+
+        ax.set_xlabel("Damage Type")
+
+        ax.set_title("Road Damage Confidence")
 
         st.pyplot(fig)
 
-        st.subheader("Probability Distribution")
+        # PIE CHART
 
-        fig2, ax2 = plt.subplots(figsize=(7, 7))
+        st.subheader("🥧 Probability Distribution")
+
+        fig2, ax2 = plt.subplots(figsize=(7,7))
 
         ax2.pie(
             probabilities,
@@ -269,34 +379,44 @@ if image is not None:
         st.pyplot(fig2)
 
         # ======================================================
-        # SECTION 7 — RECOMMENDATIONS
+        # RECOMMENDATIONS
         # ======================================================
 
         st.header("🛠️ Recommendations")
 
-        st.markdown(
-            f"""
-            <div class='recommendation-box'>
-            <h3>{recommendations[prediction]}</h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        st.markdown(f"""
+        <div class="glass-card">
+
+        <h3>
+        {recommendations[prediction]}
+        </h3>
+
+        </div>
+        """, unsafe_allow_html=True)
 
         # ======================================================
-        # EXTRA FEATURES
+        # EXTRA INSIGHTS
         # ======================================================
 
         st.header("📌 Additional Insights")
 
         if severity == "High":
-            st.error("⚠️ Severe road damage detected. Immediate authority action required.")
+
+            st.error(
+                "⚠️ Severe road damage detected."
+            )
 
         elif severity == "Medium":
-            st.warning("⚠️ Moderate damage detected. Maintenance recommended.")
+
+            st.warning(
+                "⚠️ Moderate damage detected."
+            )
 
         else:
-            st.success("✅ Road condition is relatively stable.")
+
+            st.success(
+                "✅ Road condition stable."
+            )
 
         st.metric(
             label="AI Confidence Score",
@@ -311,13 +431,18 @@ if image is not None:
 
 st.markdown("---")
 
-st.markdown(
-    """
-    ### 🚀 Smart City Vision
+st.markdown("""
+<div class="glass-card">
 
-    AI-based road monitoring systems help governments automate infrastructure inspection,
-    reduce manual labor, improve public safety, and support future smart transportation systems.
-    """
-)
+<h2 style="text-align:center;">
+🌍 Smart City Vision
+</h2>
 
+<p style="text-align:center; font-size:18px;">
+AI-powered road monitoring systems help governments
+improve public safety, automate infrastructure inspection,
+and support future smart transportation systems.
+</p>
 
+</div>
+""", unsafe_allow_html=True)
