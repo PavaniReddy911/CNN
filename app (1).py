@@ -3,8 +3,9 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
-import tensorflow as tf
 import matplotlib.pyplot as plt
+import joblib
+import cv2
 
 # --------------------------------------------------
 # PAGE CONFIG
@@ -19,8 +20,8 @@ st.set_page_config(
 # LOAD MODEL
 # --------------------------------------------------
 
-# Replace with your trained model path
-model = tf.keras.models.load_model("model/road_damage_model.h5")
+# Load trained ML model
+model = joblib.load("model/road_damage_model.pkl")
 
 # --------------------------------------------------
 # CLASS LABELS
@@ -40,29 +41,29 @@ st.markdown("""
 st.divider()
 
 # --------------------------------------------------
-# ABOUT PROJECT SECTION
+# ABOUT PROJECT
 # --------------------------------------------------
 
 st.subheader("📘 About the Project")
 
 st.write("""
-Road monitoring is essential for preventing accidents, reducing maintenance costs,
+Road monitoring is important for reducing accidents
 and improving transportation safety.
 
-This system uses Convolutional Neural Networks (CNNs) to automatically detect
-road damages such as potholes, cracks, and manholes from road images.
+This AI system detects road damages like potholes,
+cracks, and manholes using image analysis.
 
 ### Industry Applications
-- Smart City Infrastructure
-- Government Road Monitoring
+- Smart Cities
+- Road Safety Monitoring
+- Government Infrastructure
 - Autonomous Vehicles
-- Traffic Safety Systems
 """)
 
 st.divider()
 
 # --------------------------------------------------
-# IMAGE UPLOAD SECTION
+# IMAGE UPLOAD
 # --------------------------------------------------
 
 st.subheader("📂 Upload Road Image")
@@ -73,7 +74,7 @@ uploaded_file = st.file_uploader(
 )
 
 # --------------------------------------------------
-# IMAGE PREVIEW
+# IMAGE PROCESSING
 # --------------------------------------------------
 
 if uploaded_file is not None:
@@ -82,43 +83,57 @@ if uploaded_file is not None:
 
     col1, col2 = st.columns(2)
 
+    # --------------------------------------------------
+    # IMAGE PREVIEW
+    # --------------------------------------------------
+
     with col1:
         st.subheader("🖼 Uploaded Image")
         st.image(image, use_container_width=True)
 
     # --------------------------------------------------
-    # IMAGE PREPROCESSING
+    # PREPROCESS IMAGE
     # --------------------------------------------------
 
-    img = image.resize((224, 224))
-    img_array = np.array(img)
+    img = np.array(image)
 
-    # Convert grayscale to RGB if needed
-    if len(img_array.shape) == 2:
-        img_array = np.stack((img_array,) * 3, axis=-1)
+    # Resize image
+    img = cv2.resize(img, (128, 128))
 
-    img_array = img_array / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    # Flatten image
+    flat_img = gray.flatten()
+
+    # Normalize
+    flat_img = flat_img / 255.0
+
+    # Reshape for model
+    flat_img = flat_img.reshape(1, -1)
 
     # --------------------------------------------------
     # PREDICTION
     # --------------------------------------------------
 
-    prediction = model.predict(img_array)
+    prediction = model.predict(flat_img)[0]
 
-    predicted_index = np.argmax(prediction)
-    predicted_class = classes[predicted_index]
+    probabilities = model.predict_proba(flat_img)[0]
 
-    confidence = float(np.max(prediction) * 100)
+    confidence = np.max(probabilities) * 100
+
+    predicted_class = classes[prediction]
 
     # --------------------------------------------------
-    # SEVERITY LOGIC
+    # SEVERITY LEVEL
     # --------------------------------------------------
 
     if confidence < 40:
         severity = "Low"
+
     elif confidence < 75:
         severity = "Medium"
+
     else:
         severity = "High"
 
@@ -131,7 +146,9 @@ if uploaded_file is not None:
         st.subheader("🤖 Prediction Results")
 
         st.success(f"Prediction: {predicted_class}")
+
         st.info(f"Confidence: {confidence:.2f}%")
+
         st.warning(f"Severity: {severity}")
 
     st.divider()
@@ -142,39 +159,44 @@ if uploaded_file is not None:
 
     st.subheader("📊 Prediction Visualization")
 
-    probs = prediction[0] * 100
+    probs = probabilities * 100
 
     fig, ax = plt.subplots(figsize=(6, 4))
 
     ax.bar(classes, probs)
 
-    ax.set_ylabel("Confidence (%)")
     ax.set_xlabel("Damage Type")
-    ax.set_title("Class Confidence")
+
+    ax.set_ylabel("Confidence (%)")
+
+    ax.set_title("Class Confidence Graph")
 
     st.pyplot(fig)
 
     st.divider()
 
     # --------------------------------------------------
-    # RECOMMENDATION SECTION
+    # RECOMMENDATIONS
     # --------------------------------------------------
 
     st.subheader("📌 Recommendations")
 
     if predicted_class == "Pothole":
+
         st.error("""
         Immediate maintenance recommended.
         High-risk road condition detected.
         """)
 
     elif predicted_class == "Crack":
+
         st.warning("""
-        Schedule preventive repair.
+        Preventive repair suggested.
         Moderate road damage identified.
         """)
 
     elif predicted_class == "Manhole":
+
         st.info("""
         Inspection required for public safety.
         Possible infrastructure issue detected.
@@ -186,4 +208,4 @@ if uploaded_file is not None:
 
 st.divider()
 
-st.caption("Developed using CNN + Deep Learning + Streamlit")
+st.caption("Developed using Machine Learning + Streamlit")
