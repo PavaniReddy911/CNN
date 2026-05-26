@@ -111,17 +111,7 @@ if uploaded_file is not None:
     # Reshape for model
     flat_img = flat_img.reshape(1, -1)
 
-    # --------------------------------------------------
-    # PREDICTION
-    # --------------------------------------------------
-
-    prediction = model.predict(flat_img)[0]
-
-    probabilities = model.predict_proba(flat_img)[0]
-
-    confidence = np.max(probabilities) * 100
-
-    predicted_class = classes[prediction]
+    
 
     # --------------------------------------------------
     # SEVERITY LEVEL
