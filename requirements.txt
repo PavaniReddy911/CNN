@@ -1,5 +1,7 @@
-streamlit==1.57.0
+streamlit
 numpy
-pandas
+pillow
+matplotlib
 scikit-learn
-plotly>=5.15.0
+joblib
+opencv-python-headless
